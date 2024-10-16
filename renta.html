@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur de Rentabilité Immobilière</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .field {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .result {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: black;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            max-width: 100px;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #003366; /* Bleu marine */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #002244; /* Bleu marine plus foncé */
+        }
+        @media (max-width: 600px) {
+            .circle {
+                width: 80px;
+                height: 80px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="images/KINVEST.jpg" alt="Logo KINVEST">
+        </div>
+        <h1>Calculateur de Rentabilité Immobilière</h1>
+        <div class="field">
+            <label for="prix_acquisition">Prix d'acquisition (hors frais de notaires)</label>
+            <input type="number" id="prix_acquisition">
+        </div>
+        <div class="field">
+            <label for="type_acquisition">Type d'acquisition</label>
+            <select id="type_acquisition">
+                <option value="ancien">Ancien</option>
+                <option value="neuf">Neuf</option>
+            </select>
+        </div>
+        <div class="field">
+            <label for="estimation_travaux">Estimation des coûts des travaux</label>
+            <input type="number" id="estimation_travaux">
+        </div>
+        <div class="field">
+            <label for="loyer_mensuel">Loyer mensuel (charges comprises)</label>
+            <input type="number" id="loyer_mensuel">
+        </div>
+        <div class="field">
+            <label for="charges_copropriete">Charges de copropriété</label>
+            <input type="number" id="charges_copropriete">
+        </div>
+        <div class="field">
+            <label for="estimation_taxe_fonciere">Estimation de la taxe foncière annuelle</label>
+            <input type="number" id="estimation_taxe_fonciere">
+        </div>
+        <div class="button-container">
+            <button onclick="calculateRentability()">Calculer</button>
+        </div>
+        <div class="result">
+            <div class="circle">
+                <p>Frais de notaire: <br><span id="frais_notaire"></span> €</p>
+            </div>
+            <div class="circle">
+                <p>Rentabilité brute: <br><span id="rentabilite_brute"></span>%</p>
+            </div>
+            <div class="circle">
+                <p>Rentabilité nette: <br><span id="rentabilite_nette"></span>%</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateFraisNotaire(prix_acquisition, type_acquisition) {
+            const droits_enregistrement = 0.0509 * prix_acquisition;
+            const frais_debours = 1000;  // Hypothèse d'un montant fixe pour simplifier
+            const emoluments_notaires = 0.01 * prix_acquisition;
+
+            if (type_acquisition === 'neuf') {
+                const frais_notaire_reduits = 0.025 * prix_acquisition;
+                return frais_notaire_reduits + frais_debours + emoluments_notaires;
+            }
+
+            return droits_enregistrement + frais_debours + emoluments_notaires;
+        }
+
+        function calculateRentability() {
+            const prix_acquisition = parseFloat(document.getElementById('prix_acquisition').value);
+            const type_acquisition = document.getElementById('type_acquisition').value;
+            const estimation_travaux = parseFloat(document.getElementById('estimation_travaux').value);
+            const loyer_mensuel = parseFloat(document.getElementById('loyer_mensuel').value);
+            const charges_copropriete = parseFloat(document.getElementById('charges_copropriete').value);
+            const estimation_taxe_fonciere = parseFloat(document.getElementById('estimation_taxe_fonciere').value);
+
+            const estimation_frais_notaire = calculateFraisNotaire(prix_acquisition, type_acquisition);
+            const cout_acquisition = prix_acquisition + estimation_frais_notaire + estimation_travaux;
+            const frais_gestion_entretien = 0.08 * (loyer_mensuel - charges_copropriete);
+            const revenu_locatif_annuel = (loyer_mensuel * 12) - (charges_copropriete * 12) - frais_gestion_entretien - estimation_taxe_fonciere;
+
+            const rentabilite_brute = (loyer_mensuel * 12) / cout_acquisition * 100;
+            const rentabilite_nette = revenu_locatif_annuel / cout_acquisition * 100;
+
+            document.getElementById('frais_notaire').innerText = estimation_frais_notaire.toFixed(2);
+            document.getElementById('rentabilite_brute').innerText = rentabilite_brute.toFixed(2);
+            document.getElementById('rentabilite_nette').innerText = rentabilite_nette.toFixed(2);
+        }
+    </script>
+</body>
+</html>
